@@ -1,0 +1,587 @@
+---
+title: "Kuan-I Lu Script"
+output: html_document
+date: "2024-10-23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Benchmarked vs Modified Models Values
+
+  **Benchmark** 
+    4 proteins
+    sensitivity = 0.875
+    specificity = 0.8
+    accuracy = 0.839
+    roc_auc = 0.908
+  
+  **Problem 3**
+    **Part 1** 
+      4 proteins
+      sensitivity = 0.7692
+      accuracy = 0.6774
+    **Part 2**
+      13 proteins
+      sensitivity = 0.8125
+      accuracy = 0.839
+    **Part 3**
+      6 proteins
+      sensitivity = 0.75
+      accuracy = 0.7742
+      
+  **Problem 4**
+    **attempt 1: Correlation**
+      2 proteins
+      accuracy = 0.613
+    **attempt 2: LASSO Regression**
+      3 proteins
+      accuracy = 0.8710 (success)
+    
+    
+
+## Problem 3
+
+  Load the pre-cleaned dataset from the data file
+
+```{r}
+library(tidyverse)
+library(infer)
+library(randomForest)
+library(tidymodels)
+library(modelr)
+library(yardstick)
+library(ggplot2)
+load('C:/D/homework/PSTAT 197/module1-group-11/data/biomarker-clean.RData')
+```
+
+  Explore sensitivity with alternative methods
+
+### Part 1
+
+  Partition the dataset first
+
+```{r}
+# partition 80% as training set, save as biomarker_train
+set.seed(20251024)
+
+biomarker_clean_split = biomarker_clean %>%
+  initial_split(prop = 0.8)
+
+biomarker_train = training(biomarker_clean_split)
+biomarker_test = testing(biomarker_clean_split)
+```
+
+  Then replicate the feature selecting process with the training dataset
+  
+   - Obtain first panel, proteins_s1, with t-test
+
+```{r}
+# t-test
+# Following code from inclass-analysis.R
+# function to compute tests
+test_fn <- function(.df){
+  t_test(.df, 
+         formula = level ~ group,
+         order = c('ASD', 'TD'),
+         alternative = 'two-sided',
+         var.equal = F)
+}
+
+ttests_out <- biomarker_train %>% ################ Use biomarker_train instead of biomarker_clean
+  # drop ADOS score
+  select(-ados) %>%
+  # arrange in long format
+  pivot_longer(-group, 
+               names_to = 'protein', 
+               values_to = 'level') %>%
+  # nest by protein
+  nest(data = c(level, group)) %>% 
+  # compute t tests
+  mutate(ttest = map(data, test_fn)) %>%
+  unnest(ttest) %>%
+  # sort by p-value
+  arrange(p_value) %>%
+  # multiple testing correction
+  mutate(m = n(),
+         hm = log(m) + 1/(2*m) - digamma(1),
+         rank = row_number(),
+         p.adj = m*hm*p_value/rank)
+
+# select significant proteins
+proteins_s1 <- ttests_out %>%
+  slice_min(p.adj, n = 10) %>% ########## Select 10 in this case
+  pull(protein)
+```
+
+   - Obtain second panel, proteins_s2, with random forest
+   
+```{r}
+# Random forest
+# store predictors and response separately
+predictors <- biomarker_train %>% ############### Use biomarker_train instead of biomarker_clean
+  select(-c(group, ados))
+
+response <- biomarker_train %>% pull(group) %>% factor()
+
+# fit RF
+set.seed(20241024)
+rf_out <- randomForest(x = predictors, 
+                       y = response, 
+                       ntree = 1000, 
+                       importance = T)
+
+# compute importance scores
+proteins_s2 <- rf_out$importance %>% 
+  as_tibble() %>%
+  mutate(protein = rownames(rf_out$importance)) %>%
+  slice_max(MeanDecreaseGini, n = 10) %>%
+  pull(protein)
+```
+  
+  Obtain the intercept of the two panels and fit into logistic regression
+  
+```{r}
+# Logistic Regression
+# select subset of interest
+proteins_sstar <- intersect(proteins_s1, proteins_s2)
+
+biomarker_sstar <- biomarker_train %>% ##################  Use biomarker_train instead of biomarker_clean
+  select(group, any_of(proteins_sstar)) %>%
+  mutate(class = (group == 'ASD')) %>%
+  select(-group)
+
+biomarker_test = biomarker_test %>%
+  select(group, any_of(proteins_sstar)) %>%
+  mutate(class = (group == 'ASD')) %>%
+  select(-group)
+
+# fit logistic regression model to training set
+fit <- glm(class ~ ., 
+           data = biomarker_sstar, 
+           family = 'binomial')
+
+# evaluate errors on test set
+##############  Use biomarker_test that we partitioned in the first step
+class_metrics <- metric_set(sensitivity, 
+                            specificity, 
+                            accuracy,
+                            roc_auc)
+
+biomarker_test %>%
+  add_predictions(fit, type = 'response') %>%
+  mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
+  class_metrics(estimate = est,
+              truth = tr_c, pred,
+              event_level = 'second')
+```
+ 
+  The final panel has 4 proteins
+
+  After fitting the model trained on the training set on the testing set, our results has **sensitivity of 0.7692** and **accuracy of 0.6774**.
+
+
+### Part 2
+
+  Not much modification from the in class analysis code but choose more than 10 variables for each panel. Here I choose 25 to allow a larger intercept values
+
+```{r}
+## MULTIPLE TESTING
+####################
+
+# function to compute tests
+test_fn <- function(.df){
+  t_test(.df, 
+         formula = level ~ group,
+         order = c('ASD', 'TD'),
+         alternative = 'two-sided',
+         var.equal = F)
+}
+
+ttests_out <- biomarker_clean %>%
+  # drop ADOS score
+  select(-ados) %>%
+  # arrange in long format
+  pivot_longer(-group, 
+               names_to = 'protein', 
+               values_to = 'level') %>%
+  # nest by protein
+  nest(data = c(level, group)) %>% 
+  # compute t tests
+  mutate(ttest = map(data, test_fn)) %>%
+  unnest(ttest) %>%
+  # sort by p-value
+  arrange(p_value) %>%
+  # multiple testing correction
+  mutate(m = n(),
+         hm = log(m) + 1/(2*m) - digamma(1),
+         rank = row_number(),
+         p.adj = m*hm*p_value/rank)
+
+# select significant proteins
+proteins_s1 <- ttests_out %>%
+  slice_min(p.adj, n = 25) %>% ####################################### Select 25 instead of 10
+  pull(protein)
+
+## RANDOM FOREST
+##################
+
+# store predictors and response separately
+predictors <- biomarker_clean %>%
+  select(-c(group, ados))
+
+response <- biomarker_clean %>% pull(group) %>% factor()
+
+# fit RF
+set.seed(101422)
+rf_out <- randomForest(x = predictors, 
+                       y = response, 
+                       ntree = 1000, 
+                       importance = T)
+
+# compute importance scores
+proteins_s2 <- rf_out$importance %>% 
+  as_tibble() %>%
+  mutate(protein = rownames(rf_out$importance)) %>%
+  slice_max(MeanDecreaseGini, n = 25) %>% ############################# Select 25 instead of 10
+  pull(protein)
+
+## LOGISTIC REGRESSION
+#######################
+
+# select subset of interest
+proteins_sstar <- intersect(proteins_s1, proteins_s2)
+
+biomarker_sstar <- biomarker_clean %>%
+  select(group, any_of(proteins_sstar)) %>%
+  mutate(class = (group == 'ASD')) %>%
+  select(-group)
+```
+
+  Note that we have 13 proteins in our final panel, as opposed to the 4 protein panel with 10 protein from each methods
+
+```{r}
+
+# partition into training and test set
+set.seed(101422)
+biomarker_split <- biomarker_sstar %>%
+  initial_split(prop = 0.8)
+
+# fit logistic regression model to training set
+fit <- glm(class ~ ., 
+           data = training(biomarker_split), 
+           family = 'binomial')
+
+# evaluate errors on test set
+class_metrics <- metric_set(sensitivity, 
+                            specificity, 
+                            accuracy,
+                            roc_auc)
+
+testing(biomarker_split) %>%
+  add_predictions(fit, type = 'response') %>%
+  mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
+  class_metrics(estimate = est,
+              truth = tr_c, pred,
+              event_level = 'second')
+```
+
+  After fitting the model trained on the training set on the testing set, our results has **sensitivity of 0.8125** and **accuracy of 0.8387**.
+
+
+### Part 3
+
+  We essentially do the same thing as well, but use fuzzy intersection to create the final panel from the two 10-protein panels.
+  
+  Before executing, We're speculating if this modification would actually be useful since the name of the protein doesn't really give out much information, but we will try regardless.
+  
+```{r}
+## MULTIPLE TESTING
+####################
+
+# function to compute tests
+test_fn <- function(.df){
+  t_test(.df, 
+         formula = level ~ group,
+         order = c('ASD', 'TD'),
+         alternative = 'two-sided',
+         var.equal = F)
+}
+
+ttests_out <- biomarker_clean %>%
+  # drop ADOS score
+  select(-ados) %>%
+  # arrange in long format
+  pivot_longer(-group, 
+               names_to = 'protein', 
+               values_to = 'level') %>%
+  # nest by protein
+  nest(data = c(level, group)) %>% 
+  # compute t tests
+  mutate(ttest = map(data, test_fn)) %>%
+  unnest(ttest) %>%
+  # sort by p-value
+  arrange(p_value) %>%
+  # multiple testing correction
+  mutate(m = n(),
+         hm = log(m) + 1/(2*m) - digamma(1),
+         rank = row_number(),
+         p.adj = m*hm*p_value/rank)
+
+# select significant proteins
+proteins_s1 <- ttests_out %>%
+  slice_min(p.adj, n = 10) %>%
+  pull(protein)
+
+## RANDOM FOREST
+##################
+
+# store predictors and response separately
+predictors <- biomarker_clean %>%
+  select(-c(group, ados))
+
+response <- biomarker_clean %>% pull(group) %>% factor()
+
+# fit RF
+set.seed(101422)
+rf_out <- randomForest(x = predictors, 
+                       y = response, 
+                       ntree = 1000, 
+                       importance = T)
+
+# compute importance scores
+proteins_s2 <- rf_out$importance %>% 
+  as_tibble() %>%
+  mutate(protein = rownames(rf_out$importance)) %>%
+  slice_max(MeanDecreaseGini, n = 10) %>%
+  pull(protein)
+
+## LOGISTIC REGRESSION
+#######################
+
+################################################################################# Use fuzzy intersect instead of intersect()
+library(stringdist)
+# Compute string distance matrix (using Levenshtein distance by default)
+dist_matrix <- stringdistmatrix(proteins_s1, proteins_s2)
+
+# Set a threshold for "closeness" (e.g., a maximum allowable distance of 2)
+threshold <- 3 ######### Choose value based on the confusion matrix
+
+# Find matches where the distance is below the threshold
+fuzzy_matches <- which(dist_matrix <= threshold, arr.ind = TRUE)
+
+# store all matching proteins in proteins_sstar and select the unique proteins
+proteins_sstar = c()
+
+for (match in 1:nrow(fuzzy_matches)) {
+  proteins_sstar = c(proteins_sstar, proteins_s1[fuzzy_matches[match, 1]], proteins_s2[fuzzy_matches[match, 2]])
+}
+
+proteins_sstar = proteins_sstar %>% unique()
+
+###################################################################################
+```
+
+  We have 6 proteins in our final panel, as opposed to the 4 protein panel with exact matching
+
+```{r}
+biomarker_sstar <- biomarker_clean %>%
+  select(group, any_of(proteins_sstar)) %>%
+  mutate(class = (group == 'ASD')) %>%
+  select(-group)
+
+# partition into training and test set
+set.seed(101422)
+biomarker_split <- biomarker_sstar %>%
+  initial_split(prop = 0.8)
+
+# fit logistic regression model to training set
+fit <- glm(class ~ ., 
+           data = training(biomarker_split), 
+           family = 'binomial')
+
+# evaluate errors on test set
+class_metrics <- metric_set(sensitivity, 
+                            specificity, 
+                            accuracy,
+                            roc_auc)
+
+testing(biomarker_split) %>%
+  add_predictions(fit, type = 'response') %>%
+  mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
+  class_metrics(estimate = est,
+              truth = tr_c, pred,
+              event_level = 'second')
+```
+
+  After fitting the model trained on the training set on the testing set, our results has **sensitivity of 0.75** and **accuracy of 0.7742**. As expected, fuzzy match did not improve the results
+
+
+## Problem 4
+
+  Goal: a simpler panel that achieves comparable classification accuracy (0.839). *Note: only focus on accuracy*
+  
+  The benchmarked panel already only has 4 proteins, so we have to come up with a panel that has less than 4 preteins, either based on the current panel or other feature selection methods
+  
+  Ideas: Correlation, LASSO regression, Solely random forest, Elastic Net, Correlation
+  
+### Attempt 1, Correlation
+  
+  Let's try Correlation first
+  
+```{r}
+# Correlation
+# partition 80% as training set, save as biomarker_train
+set.seed(20251024)
+
+biomarker_clean_split = biomarker_clean %>%
+  initial_split(prop = 0.8)
+
+biomarker_train = training(biomarker_clean_split)
+biomarker_test = testing(biomarker_clean_split)
+
+# Only get observation in group "ASD"
+biomarker_train_asd = biomarker_train %>% 
+  filter(group == "ASD") %>% 
+  select(-group)
+
+# compute correlations and select top three proteins with highest absolute values of correlation
+proteins_sstar = biomarker_train_asd %>% 
+  pivot_longer(cols = -ados,
+               names_to = 'protein',
+               values_to = 'level') %>%
+  group_by(protein) %>%
+  summarize(correlation = cor(ados, level)) %>% 
+  mutate(abs_corr = abs(correlation)) %>% 
+  slice_max(order_by = abs_corr, n = 2) %>% 
+  pull(protein)
+  
+
+```
+
+We have constructed a panel of 2 proteins based on the highest absolute value of correlation.
+
+```{r}
+biomarker_sstar <- biomarker_clean %>%
+  select(group, any_of(proteins_sstar)) %>%
+  mutate(class = (group == 'ASD')) %>%
+  select(-group)
+
+# partition into training and test set
+set.seed(20241024)
+biomarker_split <- biomarker_sstar %>%
+  initial_split(prop = 0.8)
+
+# fit logistic regression model to training set
+fit <- glm(class ~ ., 
+           data = training(biomarker_split), 
+           family = 'binomial')
+
+# evaluate errors on test set
+class_metrics <- metric_set(accuracy)
+
+testing(biomarker_split) %>%
+  add_predictions(fit, type = 'response') %>%
+  mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
+  class_metrics(estimate = est,
+              truth = tr_c, pred,
+              event_level = 'second')
+```
+
+ The accuracy of the model is 0.613, which is far from the goal.
+
+### Attempt 2: LASSO Regression
+
+  Now lets try LASSO Regression
+  
+```{r}
+# LASSO regression
+library(glmnet)
+# create class variable
+biomarker_LASSO = biomarker_clean %>% 
+  select(-ados) %>% 
+  mutate(class = as.numeric(group == 'ASD'))
+
+set.seed(101622)
+partitions <- biomarker_LASSO %>%
+  initial_split(prop = 0.8)
+
+x_train <- training(partitions) %>%
+  select(-group, -class) %>%
+  as.matrix()
+y_train <- training(partitions) %>%
+  pull(class)
+
+# tune and fit the LASSO model
+plot(cv.glmnet(x_train, y_train, family = 'binomial', type.measure = 'deviance'))
+
+# Choose a reasonable lambda value based on the plot, with the goal of reducing to less than 4 proteins
+lambda = exp(-1.8)
+
+# Fit again
+final_fit <- glmnet(x_train, y_train, family = 'binomial', lambda = lambda)
+final_fit_df = tidy(final_fit)
+
+# Extract the core proteins
+proteins_sstar = final_fit_df %>%
+  filter(term != "(Intercept)") %>% 
+  pull(term)
+```
+
+Note that we have constructed a panel with 3 proteins
+
+```{r}
+biomarker_sstar <- biomarker_clean %>%
+  select(group, any_of(proteins_sstar)) %>%
+  mutate(class = (group == 'ASD')) %>%
+  select(-group)
+
+# partition into training and test set
+set.seed(1024)
+biomarker_split <- biomarker_sstar %>%
+  initial_split(prop = 0.8)
+
+# fit logistic regression model to training set
+fit <- glm(class ~ ., 
+           data = training(biomarker_split), 
+           family = 'binomial')
+
+# evaluate errors on test set
+class_metrics <- metric_set(accuracy)
+
+testing(biomarker_split) %>%
+  add_predictions(fit, type = 'response') %>%
+  mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
+  class_metrics(estimate = est,
+              truth = tr_c, pred,
+              event_level = 'second')
+```
+
+  With feature selection using LASSO regression, we've successfully created a panel of 3 proteins ("MAPK2", "IgD", and "DERM" ) that, when fit into a logistic regression, reaches accuracy of **0.8710**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -3,6 +3,9 @@ output:
   pdf_document: default
   html_document: default
 ---
+
+## Question 1
+
 ```{r}
 library(readr)
 library(ggplot2)

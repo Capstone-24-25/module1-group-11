@@ -586,6 +586,17 @@ read_csv("method_2_result.csv")
 
 
 
+## Flowchart for writeups
+
+```{r}
+library(DiagrammeR)
+
+
+mermaid("
+  graph LR
+  A -> B
+")
+```
 
 
 

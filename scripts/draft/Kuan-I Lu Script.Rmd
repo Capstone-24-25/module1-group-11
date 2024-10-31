@@ -591,14 +591,13 @@ read_csv("method_2_result.csv")
 ```{r}
 mermaid("
   graph LR;
+  
   A[Multiple t-test] --> B[10 protein panel];
   C[Correlation] --> D[10 protein panel];
   E[Random Forest] --> F[10 protein panel];
-  B --> G[Intersect of 9 panels]
-  B -- Yes --> C[Take an umbrella];
-  B -- No --> D[Enjoy your day];
-  C --> E[Go to your destination];
-  D --> E;
+  B --> G[Intersect of 9 panels];
+  D --> G;
+  F --> G;
 ")
 ```
 

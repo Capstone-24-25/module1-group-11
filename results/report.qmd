@@ -88,16 +88,76 @@ outlier_groups <- outlier_count %>%
 
 ### Methodological variations
 
-The benchmark protein panel was using 4 proteins which resulted in a sensitivity of 0.875 and accuracy of 0.839. Our goal now is to determine alternate methods to extract a comparable panel that can reproduce similar resulting values. First we will partition the data into a training and testing set, using the training data to select the protein panel. Using a t-test and random forest variable importance we extract two different protein panels which we will then determine our final panel by selecting intersecting proteins from both tests. Our result is 4 selected proteins, which when fitted to the testing data returned a sensitivity of 0.769 and accuracy of 0.677. Despite using the same method to derive our protein panel, our panel provides a weaker accuracy of the data. This is most likely due to the variability of a training and testing set. Because we do not have the entire data to find significant proteins, it leaves room for error when finding proteins.
+The benchmark protein panel was using 4 proteins which resulted in a sensitivity of 0.875 and accuracy of 0.839. Our goal now is to determine alternate methods to extract a comparable panel that can reproduce similar resulting values. First we will partition the data into a training and testing set, using the training data to select the protein panel. Using a t-test and random forest variable importance we extract two different protein panels which we will then determine our final panel by selecting intersecting proteins from both tests. Our result is 4 selected proteins, which when fitted to the testing data returned a sensitivity of 0.769 and accuracy of 0.677. Despite using the same method to derive our protein panel, our panel provides a weaker accuracy of the data. This is most likely due to the variability of a training and testing set. Because we do not have the entire data to find significant proteins, it leaves room for error when finding proteins. The metrics of the fitted model is provided below:
+
+```{r}
+read_csv("../data/part_1_result.csv")
+```
+
 
 The next step is to attempt a panel with more proteins. For both the t-test and logistical regression, we selected 25 potentially significant proteins from both to then intersect and find our panel. This method produced us a panel of 13 proteins, with a resulting sensitivity of 0.8125 and accuracy of 0.839, significantly better than our smaller panel of 4 proteins. Our results have improved significantly as we have included additional variables to estimate the result. The additional proteins we employed in testing may still have some significance towards our estimates, hence why it performed better, just because they weren't significant enough they still have some correlation to the outcome.
 
+```{r}
+read_csv("../data/part_2_result.csv")
+
+```
+
+
 Finally, we will make a panel using the original selection of 10 proteins using t-testing and random forests, but we will employ fuzzy intersection to determine the final panel. The result is a panel of 6 proteins that have a sensitivity of 0.75 and a accuracy of 0.774 after testing on the testing data. Using fuzzy intersection did not improve estimates to the same level of our benchmark, but it still produced pretty impressive accuracy results. Compared to our first panel of 4 proteins the fuzzy intersection had worse sensitivity, but had much more accuracy.
+
+```{r}
+read_csv("../data/part_3_result.csv")
+
+```
+
 
 ### Improved classifier
 
 Now that we have looked at methodical variations with the way we select our protein panel, we will now attempt to find a panel that has better accuracy than the benchmark panel.
 
-Our first attempt was to use correlation to determine significant proteins. As in the before section, we will partition the data first to create a training and testing set, and filter the data so we are just looking at participants who have ASD. We then determined the correlation of each variable, selecting the 2 proteins that had the highest absolute value of the correlation. Our resulting accuracy was 0.613 when testing on the testing data, so while this was a simpler panel, its estimates were far from comparable to our benchmark panel.
+Our first attempt was to use correlation to determine significant proteins. As in the previous section, we will partition the data first to create a training and testing set, and filter the data so we are just looking at participants who have ASD. We then determined the correlation of each variable, selecting the 2 proteins that had the highest absolute value of the correlation. Our resulting accuracy was 0.613 when testing on the testing data, so while this was a simpler panel, its estimates were far from comparable to our benchmark panel.
 
-Our second attempt was using LASSO regression to find our panel. First we tuned and fitted the Lasso model using deviance as our measure. We then found a lambda, e\^(-1.8), that how a low deviance and allowed for a small protein panel. The result of using this lambda was a panel of 3 proteins, which when tested on the testing set returned an accuracy of 0.871. This result improved upon our benchmark of 0.831 with a smaller panel, so we were successful in finding a simple panel with comparable results.
+```{r}
+read_csv("../data/method_1_result.csv")
+
+```
+
+Our second attempt was using LASSO regression to find our panel. First we tuned and fitted the Lasso model using deviance as our measure. The deviance graph with respect to the lamba value(the threshold) is shown below:
+
+```{r}
+# create class variable
+biomarker_LASSO = biomarker_clean %>% 
+  select(-ados) %>% 
+  mutate(class = as.numeric(group == 'ASD'))
+
+set.seed(101622)
+partitions <- biomarker_LASSO %>%
+  initial_split(prop = 0.8)
+
+x_train <- training(partitions) %>%
+  select(-group, -class) %>%
+  as.matrix()
+y_train <- training(partitions) %>%
+  pull(class)
+
+# tune and fit the LASSO model
+plot(cv.glmnet(x_train, y_train, family = 'binomial', type.measure = 'deviance'))
+```
+
+ Note that the suggested lambda range is between -2 and -3. However, since the purpose of this method is to create a "simpler" panel with less proteins, we then found a lambda, e\^(-1.8), that have a low deviance and allowed for a small protein panel. The result of using this lambda was a panel of 3 proteins, which when tested on the testing set returned an accuracy of 0.871. This result improved upon our benchmark of 0.831 with a smaller panel, so we were successful in finding a simple panel with comparable results.
+ 
+```{r}
+read_csv("../data/method_2_result.csv")
+
+```
+ 
+
+
+
+
+
+
+
+
+
+

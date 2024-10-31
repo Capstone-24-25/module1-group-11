@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ## Question 1
@@ -24,7 +24,7 @@ head(raw_data)
 The raw data appears to be in long format consisting of 1317 proteins and 154 recorded observations for each protein. To answer the first question, we must clean the data by removing the first two rows and the second column since that information is not necessary when coding the following visualization step. We want to look at the distributions of the first five proteins and compare them to the log-transformed distributions so we can also remove the the proteins not included in this sample.
 
 
-```{r, fig.cap = "Top: Raw Distribution of Protein Levels, Bottom: Log-Transformed Protein Levels, From left to right, the target full names are: 'E3 ubiquitin-protein ligase CHIP', 'CCAAT/enhancer-binding protein beta', 'Gamma-enolase', 'E3 SUMO-protein ligase PIAS4', and 'Interleukin-10 receptor subunit alpha'."}
+```{r, fig.cap = "From left to right, the target full names are: 'E3 ubiquitin-protein ligase CHIP', 'CCAAT/enhancer-binding protein beta', 'Gamma-enolase', 'E3 SUMO-protein ligase PIAS4', and 'Interleukin-10 receptor subunit alpha'."}
 par(mfrow = c(2, 5))
 protein_sample <- raw_data[, c('E3 ubiquitin-protein ligase CHIP', 'CCAAT/enhancer-binding protein beta', 'Gamma-enolase', 'E3 SUMO-protein ligase PIAS4', 'Interleukin-10 receptor subunit alpha')] %>% na.omit()
 abb <- c("CHIP", "CEBPB", "NSE", "PIAS4", "IL-10 Ra", "STAT3")
@@ -53,7 +53,7 @@ for (i in 1:5) {
        border = NA,
        breaks = 30)
 }
-title(main = "Log-Transformed Protein Levels", outer = TRUE, line = -18)
+title(main = "Log-Transformed Protein Levels", outer = TRUE, line = -20)
 ```
 
 The raw protein levels spans a wide range of values, from very low to very high concentrations. This results in a right-skewed distribution where most values are low but a few are extremely high which disproportionately affects the distribution of the data. Therefore, it makes sense to apply a log10 transformation in order to normalize the data, reduce variability, and improve model performance. After transforming, the distributions of the sample proteins are more symmetric and compressed. 

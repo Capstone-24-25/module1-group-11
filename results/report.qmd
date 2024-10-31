@@ -26,6 +26,7 @@ library(modelr)
 library(yardstick)
 library(ggplot2)
 library(glmnet)
+library(dplyr)
 ```
 
 ## Abstract
@@ -44,7 +45,46 @@ Summarize the methodology of the paper in 1-3 paragraphs. You need not explain t
 
 ### Impact of Preprocessing
 
+Upon initial review of the raw dataset, we noted that it contains `NA` values and the protein level values were of `character` type. So before any visualization or modeling we omitted the `NA` values and converted the protein values to `numeric` type. In order to understand why preprocessing is important, we compared the original distributions vs. the transformed distributions of the first five proteins from the raw dataset. 
 
+```{r}
+raw_data <- read_csv("../data/biomarker-raw.csv")
+raw_data <- raw_data[-1,] %>%
+  select(-2, -8:-1320) %>%
+  mutate(across(2:6, ~ as.numeric(trimws(.))))
+```
+
+```{r, fig.cap = "From left to right, the target full names are: 'E3 ubiquitin-protein ligase CHIP', 'CCAAT/enhancer-binding protein beta', 'Gamma-enolase', 'E3 SUMO-protein ligase PIAS4', and 'Interleukin-10 receptor subunit alpha'."}
+par(mfrow = c(2, 5))
+protein_sample <- raw_data[, c('E3 ubiquitin-protein ligase CHIP', 'CCAAT/enhancer-binding protein beta', 'Gamma-enolase', 'E3 SUMO-protein ligase PIAS4', 'Interleukin-10 receptor subunit alpha')] %>% na.omit()
+abb <- c("CHIP", "CEBPB", "NSE", "PIAS4", "IL-10 Ra", "STAT3")
+
+# Raw values
+for (i in 1:5) {
+  hist(protein_sample[[i]],
+       main = abb[i],
+       xlab = "Protein Levels",
+       col = "blue",
+       border = NA,
+       breaks = 30)
+}
+title(main = "Raw Distribution of Protein Levels", outer = T, line = -1)
+
+# Log-transformed values
+log_transformed <- log10(protein_sample)
+
+for (i in 1:5) {
+  hist(log_transformed[[i]],
+       main = abb[i],
+       xlab = "Protein Levels",
+       col = "lightgreen",
+       border = NA,
+       breaks = 30)
+}
+title(main = "Log-Transformed Protein Levels", outer = TRUE, line = -20)
+```
+
+The raw protein levels spans a wide range of values, from very low to very high concentrations. This results in a right-skewed distribution where most values are low but a few are extremely high which disproportionately affects the distribution of the data. Therefore, it makes sense to apply a log10 transformation in order to normalize the data, reduce variability, and improve model performance. After transforming, the distributions of the sample proteins are more symmetric and compressed. 
 
 ### Impact of Outliers
 

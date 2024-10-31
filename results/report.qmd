@@ -34,7 +34,7 @@ Write a brief one-paragraph abstract that describes the contents of your write-u
 
 ## Dataset
 
-Write a brief data description, including: how data were obtained; sample characteristics; variables measured; and data preprocessing. This can be largely based on the source paper and should not exceed 1-2 paragraphs.
+The study obtained data from blood samples of individuals with autism spectrum disorder (ASD) and control/typically developing (TD) participants to identify potential early biological markers for ASD. The sample includes 154 male pediatric subjects with 76 subjects in the ASD group and 78 subjects in the TD group, with ages ranging from 18 months to 8 years old. The data was obtained through a fasting blood draw performed on both subject groups. Initially, the assay measured 1,317 proteins in 150μl serum in 154 samples. However, 192 proteins failed to pass quality control and were removed leaving a total of 1,125 proteins to be analyzed. Thus, the dataset comprises 1,125 variables and 154 observations. Preprocessing consisted of log10 and z-transformations to normalize the data as well as clipping any z-transformed values less than -3 and greater than 3 to -3 and 3, respectively to address outliers. 
 
 ## Summary of published analysis
 

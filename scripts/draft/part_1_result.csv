@@ -1,0 +1,5 @@
+.metric,.estimator,.estimate
+sensitivity,binary,0.7692307692307693
+specificity,binary,0.6111111111111112
+accuracy,binary,0.6774193548387096
+roc_auc,binary,0.7777777777777778

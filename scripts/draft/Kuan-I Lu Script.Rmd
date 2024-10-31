@@ -162,6 +162,7 @@ fit <- glm(class ~ .,
            data = biomarker_sstar, 
            family = 'binomial')
 
+
 # evaluate errors on test set
 ##############  Use biomarker_test that we partitioned in the first step
 class_metrics <- metric_set(sensitivity, 
@@ -169,12 +170,16 @@ class_metrics <- metric_set(sensitivity,
                             accuracy,
                             roc_auc)
 
-biomarker_test %>%
+part_1_result = biomarker_test %>%
   add_predictions(fit, type = 'response') %>%
   mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
   class_metrics(estimate = est,
               truth = tr_c, pred,
-              event_level = 'second')
+              event_level = 'second') %>% 
+  as.data.frame()
+
+write_csv(part_1_result, "part_1_result.csv")
+read_csv("part_1_result.csv")
 ```
  
   The final panel has 4 proteins
@@ -279,12 +284,15 @@ class_metrics <- metric_set(sensitivity,
                             accuracy,
                             roc_auc)
 
-testing(biomarker_split) %>%
+part_2_result = testing(biomarker_split) %>%
   add_predictions(fit, type = 'response') %>%
   mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
   class_metrics(estimate = est,
               truth = tr_c, pred,
               event_level = 'second')
+
+write_csv(part_2_result, "part_2_result.csv")
+read_csv("part_2_result.csv")
 ```
 
   After fitting the model trained on the training set on the testing set, our results has **sensitivity of 0.8125** and **accuracy of 0.8387**.
@@ -407,12 +415,15 @@ class_metrics <- metric_set(sensitivity,
                             accuracy,
                             roc_auc)
 
-testing(biomarker_split) %>%
+part_3_result = testing(biomarker_split) %>%
   add_predictions(fit, type = 'response') %>%
   mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
   class_metrics(estimate = est,
               truth = tr_c, pred,
               event_level = 'second')
+
+write_csv(part_3_result, "part_3_result.csv")
+read_csv("part_3_result.csv")
 ```
 
   After fitting the model trained on the training set on the testing set, our results has **sensitivity of 0.75** and **accuracy of 0.7742**. As expected, fuzzy match did not improve the results
@@ -481,12 +492,16 @@ fit <- glm(class ~ .,
 # evaluate errors on test set
 class_metrics <- metric_set(accuracy)
 
-testing(biomarker_split) %>%
+method_1_result = testing(biomarker_split) %>%
   add_predictions(fit, type = 'response') %>%
   mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
   class_metrics(estimate = est,
               truth = tr_c, pred,
-              event_level = 'second')
+              event_level = 'second') %>% 
+  as.data.frame()
+
+write_csv(method_1_result, "method_1_result.csv")
+read_csv("method_1_result.csv")
 ```
 
  The accuracy of the model is 0.613, which is far from the goal.
@@ -550,12 +565,15 @@ fit <- glm(class ~ .,
 # evaluate errors on test set
 class_metrics <- metric_set(accuracy)
 
-testing(biomarker_split) %>%
+method_2_result = testing(biomarker_split) %>%
   add_predictions(fit, type = 'response') %>%
   mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
   class_metrics(estimate = est,
               truth = tr_c, pred,
               event_level = 'second')
+
+write_csv(method_2_result, "method_2_result.csv")
+read_csv("method_2_result.csv")
 ```
 
   With feature selection using LASSO regression, we've successfully created a panel of 3 proteins ("MAPK2", "IgD", and "DERM" ) that, when fit into a logistic regression, reaches accuracy of **0.8710**
@@ -568,6 +586,17 @@ testing(biomarker_split) %>%
 
 
 
+## Flowchart for writeups
+
+```{r}
+library(DiagrammeR)
+
+
+mermaid("
+  graph LR
+  A -> B
+")
+```
 
 
 

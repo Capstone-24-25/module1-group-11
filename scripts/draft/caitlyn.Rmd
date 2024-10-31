@@ -1,0 +1,73 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Question 1
+
+```{r}
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+raw_data <- read_csv("~/pstat 197a/module1-group-11/data/biomarker-raw.csv")
+head(raw_data)
+nrow(raw_data)
+
+raw_data <- raw_data[-1,] %>%
+  select(-2, -8:-1320) %>%
+  mutate(across(2:6, ~ as.numeric(trimws(.))))
+head(raw_data)
+```
+
+The raw data appears to be in long format consisting of 1317 proteins and 154 recorded observations for each protein. To answer the first question, we must clean the data by removing the first two rows and the second column since that information is not necessary when coding the following visualization step. We want to look at the distributions of the first five proteins and compare them to the log-transformed distributions so we can also remove the the proteins not included in this sample.
+
+
+```{r, fig.cap = "From left to right, the target full names are: 'E3 ubiquitin-protein ligase CHIP', 'CCAAT/enhancer-binding protein beta', 'Gamma-enolase', 'E3 SUMO-protein ligase PIAS4', and 'Interleukin-10 receptor subunit alpha'."}
+par(mfrow = c(2, 5))
+protein_sample <- raw_data[, c('E3 ubiquitin-protein ligase CHIP', 'CCAAT/enhancer-binding protein beta', 'Gamma-enolase', 'E3 SUMO-protein ligase PIAS4', 'Interleukin-10 receptor subunit alpha')] %>% na.omit()
+abb <- c("CHIP", "CEBPB", "NSE", "PIAS4", "IL-10 Ra", "STAT3")
+sum(is.na(protein_sample))
+
+# Raw values
+for (i in 1:5) {
+  hist(protein_sample[[i]],
+       main = abb[i],
+       xlab = "Protein Levels",
+       col = "blue",
+       border = NA,
+       breaks = 30)
+}
+title(main = "Raw Distribution of Protein Levels", outer = T, line = -1)
+
+# Log-transformed values
+log_transformed <- log10(protein_sample)
+head(log_transformed)
+
+for (i in 1:5) {
+  hist(log_transformed[[i]],
+       main = abb[i],
+       xlab = "Protein Levels",
+       col = "lightgreen",
+       border = NA,
+       breaks = 30)
+}
+title(main = "Log-Transformed Protein Levels", outer = TRUE, line = -20)
+```
+
+The raw protein levels spans a wide range of values, from very low to very high concentrations. This results in a right-skewed distribution where most values are low but a few are extremely high which disproportionately affects the distribution of the data. Therefore, it makes sense to apply a log10 transformation in order to normalize the data, reduce variability, and improve model performance. After transforming, the distributions of the sample proteins are more symmetric and compressed. 
+
+<!-- 
+Impact:
+- Protein level values were of `character` type so it must be converted to `numeric` type for modeling
+- Outliers resulted in right-skewed distribution, which led to application of log10 transform
+-->
+
+(Dataset)
+
+Write a brief data description, including: how data were obtained; sample characteristics; variables measured; and data preprocessing. This can be largely based on the source paper and should not exceed 1-2 paragraphs.
+
+The study obtained data from blood samples of individuals with autism spectrum disorder (ASD) and control/typically developing (TD) participants to identify potential early biological markers for ASD. The sample includes 154 male pediatric subjects with 76 subjects in the ASD group and 78 subjects in the TD group, with ages ranging from 18 months to 8 years old. The data was obtained through a fasting blood draw performed on both subject groups. Initially, the assay measured 1,317 proteins in 150μl serum in 154 samples. However, 192 proteins failed to pass quality control and were removed leaving a total of 1,125 proteins to be analyzed. Thus, the dataset comprises 1,125 variables and 154 observations. Preprocessing consisted of log10 and z-transformations to normalize the data as well as clipping any z-transformed values less than -3 and greater than 3 to -3 and 3, respectively to address outliers. 
+
+

@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="List names here">
-<meta name="dcterms.date" content="2023-10-27">
+<meta name="author" content="Kuan-I Lu, Caitlyn Vasquez, Henry Louie, Lucas Joseph">
+<meta name="dcterms.date" content="2024-10-30">
 
 <title>Biomarkers of ASD</title>
 <style>
@@ -35,6 +35,24 @@ ul.task-list li input[type="checkbox"] {
 <script src="report_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="report_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="report_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="report_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<script src="report_files/libs/d3-3.3.8/d3.min.js"></script>
+
+<script src="report_files/libs/dagre-0.4.0/dagre-d3.min.js"></script>
+
+<link href="report_files/libs/mermaid-0.3.0/dist/mermaid.css" rel="stylesheet">
+
+<script src="report_files/libs/mermaid-0.3.0/dist/mermaid.slim.min.js"></script>
+
+<link href="report_files/libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+
+<script src="report_files/libs/chromatography-0.1/chromatography.js"></script>
+
+<script src="report_files/libs/DiagrammeR-binding-1.0.11/DiagrammeR.js"></script>
+
 
 
 </head>
@@ -48,7 +66,7 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Biomarkers of ASD</h1>
-<p class="subtitle lead">If you want a subtitle put it here</p>
+<p class="subtitle lead">Group 11</p>
 </div>
 
 
@@ -58,14 +76,14 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>List names here </p>
+             <p>Kuan-I Lu, Caitlyn Vasquez, Henry Louie, Lucas Joseph </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 27, 2023</p>
+      <p class="date">October 30, 2024</p>
     </div>
   </div>
   
@@ -73,35 +91,147 @@ ul.task-list li input[type="checkbox"] {
   </div>
   
 
+
 </header>
+
 
 <p>Use this as a template. Keep the headers and remove all other text. In all, your report can be quite short. When it is complete, render and then push changes to your team repository.</p>
 <section id="abstract" class="level2">
 <h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
-<p>Write a brief one-paragraph abstract that describes the contents of your write-up.</p>
+<p>Autism spectrum disorder (ASD) is a neurodevelopmental disorder characterized by deficits in social communication and social interaction and restricted, repetitive patterns of behavior, interests, or activities. Our teams goal is to determine a protein panel that will help predict whether a child has ASD, to support diagnosis of the disorder. Our data findings are supported by the research article, “Blood Biomarker Discovery for Autism Spectrum Disorder: A Proteomic Analysis.” We will perform EDA on the data, looking at any outliers and what makes them stand apart. Additionally, we will attempt to modify our methods to find a simplier and more accurate protein panel to predict ASD in patients.</p>
 </section>
 <section id="dataset" class="level2">
 <h2 class="anchored" data-anchor-id="dataset">Dataset</h2>
-<p>Write a brief data description, including: how data were obtained; sample characteristics; variables measured; and data preprocessing. This can be largely based on the source paper and should not exceed 1-2 paragraphs.</p>
+<p>The study obtained data from blood samples of individuals with autism spectrum disorder (ASD) and control/typically developing (TD) participants to identify potential early biological markers for ASD. The sample includes 154 male pediatric subjects with 76 subjects in the ASD group and 78 subjects in the TD group, with ages ranging from 18 months to 8 years old. The data was obtained through a fasting blood draw performed on both subject groups. Initially, the assay measured 1,317 proteins in 150μl serum in 154 samples. However, 192 proteins failed to pass quality control and were removed leaving a total of 1,125 proteins to be analyzed. Thus, the dataset comprises 1,125 variables and 154 observations. Preprocessing consisted of log10 and z-transformations to normalize the data as well as clipping any z-transformed values less than -3 and greater than 3 to -3 and 3, respectively to address outliers.</p>
 </section>
 <section id="summary-of-published-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="summary-of-published-analysis">Summary of published analysis</h2>
-<p>Summarize the methodology of the paper in 1-3 paragraphs. You need not explain the methods in depth as we did in class; just indicate what methods were used and how they were combined. If possible, include a diagram that depicts the methodological design. (Quarto has support for <a href="https://quarto.org/docs/authoring/diagrams.html">GraphViz and Mermaid flowcharts</a>.) Provide key results: the proteins selected for the classifier and the estimated accuracy.</p>
+<p>The research goal was to employ proteomic analysis and machine learning to identify a panel of proteins as potential biomarkers for autism spectrum disorder (ASD). The researchers began by measuring protein levels in serum samples from boys with ASD and typically developing (TD) boys, using SomaLogic’s SOMAScan platform to analyze 1,125 proteins in total. To pinpoint proteins that significantly differed between ASD and TD groups and were correlated with ASD severity, they applied three distinct computational methods.</p>
+<p>First, they used Random Forest (RF) analysis, an ensemble decision-tree method, which evaluates each protein’s importance by shuffling its values and measuring the effect on model accuracy. They performed 1,000 iterations, averaging the importance values for each protein, and selected the top ten based on these scores. Second, they conducted a t-test analysis, a statistical test to identify proteins with significant level differences between the ASD and TD groups, choosing another ten proteins with the biggest significant differences. Third, they calculated the correlation between each protein’s levels and ASD severity, selecting ten proteins with the highest absolute correlation coefficients.</p>
+<p>Across all three methods, five proteins that consistently emerged as significant in each of the 3 methods were identified as core proteins. The researchers further enhanced the predictive accuracy of their model by combining these core proteins with four additional ones selected from the broader set of significant proteins. This final panel of nine proteins achieved a high accuracy, with AUC = 0.86 in classifying ASD, with sensitivity and specificity around 83%.</p>
+<p>Core Proteins: MAPK14, IgD, DERM, EPHB2, suPAR</p>
+<p>Additional 4 Proteins: ROR1, GI24, elF-4H, ARSB</p>
+<p>AUC = 0.860 ± 0.064</p>
+<p>Following is the graph of the workflow used in the paper:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="DiagrammeR html-widget html-fill-item" id="htmlwidget-3bfc4825936c82b0af11" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-3bfc4825936c82b0af11">{"x":{"diagram":"\n  graph LR;\n  Z[Cleaned Data] --> A[Multiple t-test];\n  Z --> C[Correlation];\n  Z --> E[Random Forest];\n  A --> B[10 protein panel];\n  C --> D[10 protein panel];\n  E --> F[10 protein panel];\n  B --> G[Intersect of 5 panels];\n  D --> G;\n  F --> G;\n  G --> H[Add 4 Proteins, total of 9];\n  H --> I[Logistic Regression, AUC = 0.86];\n"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
 </section>
 <section id="findings" class="level2">
 <h2 class="anchored" data-anchor-id="findings">Findings</h2>
-<p>Summarize your findings here. I’ve included some subheaders in a way that seems natural to me; you can structure this section however you like.</p>
-<section id="impact-of-preprocessing-and-outliers" class="level3">
-<h3 class="anchored" data-anchor-id="impact-of-preprocessing-and-outliers">Impact of preprocessing and outliers</h3>
-<p>Tasks 1-2</p>
+<section id="impact-of-preprocessing" class="level3">
+<h3 class="anchored" data-anchor-id="impact-of-preprocessing">Impact of Preprocessing</h3>
+<p>Upon initial review of the raw dataset, we noted that it contains <code>NA</code> values and the protein level values were of <code>character</code> type. So before any visualization or modeling we omitted the <code>NA</code> values and converted the protein values to <code>numeric</code> type. In order to understand why preprocessing is important, we compared the original distributions vs.&nbsp;the transformed distributions of the first five proteins from the raw dataset.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="report_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>From left to right, the target full names are: ‘E3 ubiquitin-protein ligase CHIP’, ‘CCAAT/enhancer-binding protein beta’, ‘Gamma-enolase’, ‘E3 SUMO-protein ligase PIAS4’, and ‘Interleukin-10 receptor subunit alpha’.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The raw protein levels spans a wide range of values, from very low to very high concentrations. This results in a right-skewed distribution where most values are low but a few are extremely high which disproportionately affects the distribution of the data. Therefore, it makes sense to apply a log10 transformation in order to normalize the data, reduce variability, and improve model performance. After transforming, the distributions of the sample proteins are more symmetric and compressed.</p>
 </section>
-<section id="methodlogical-variations" class="level3">
-<h3 class="anchored" data-anchor-id="methodlogical-variations">Methodlogical variations</h3>
-<p>Task 3</p>
+<section id="impact-of-outliers" class="level3">
+<h3 class="anchored" data-anchor-id="impact-of-outliers">Impact of Outliers</h3>
+<p>After taking the log-transformed data, we counted the number of proteins that exceeded a transformed level of 3, which we would consider an outlier, for each subject in order identify subjects with outlier protein profiles. Below is a boxplot describing the distribution of the number of outlier proteins for each subjects divided between subjects with ASD and subjects considered typically developing(TD).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/Outlier-Graph-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The group of subjects with ASD had a total of 813 outlier proteins while the typically developing group had larger a total of 1161. The graph shows similar distributions with typically developing subjects having a mean total of <strong>14.88</strong> outlier proteins, and subjects with ASD having a lower mean total of <strong>10.7</strong>. Both groups share a median total of proteins per subject of <strong>7</strong>.</p>
+<p>We also examined the proteins most prone to being outliers:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/Outlier-Proteins-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>A total of 722 of the proteins have 0 or 1 outliers across subjects.</strong> The proteins with the highest count of outliers across subjects include <strong>TLR2 with 7 outlier values</strong>, and <strong>IL-13, TGM3, GM-CSF, and hnRNP K, and SOD3 each with 6 outlier values.</strong></p>
+</section>
+<section id="methodological-variations" class="level3">
+<h3 class="anchored" data-anchor-id="methodological-variations">Methodological variations</h3>
+<p>The benchmark protein panel was using 4 proteins which resulted in a sensitivity of 0.875 and accuracy of 0.839. Our goal now is to determine alternate methods to extract a comparable panel that can reproduce similar resulting values. First we will partition the data into a training and testing set, using the training data to select the protein panel. Using a t-test and random forest variable importance we extract two different protein panels which we will then determine our final panel by selecting intersecting proteins from both tests. Our result is 4 selected proteins, which when fitted to the testing data returned a sensitivity of 0.769 and accuracy of 0.677. Despite using the same method to derive our protein panel, our panel provides a weaker accuracy of the data. This is most likely due to the variability of a training and testing set. Because we do not have the entire data to find significant proteins, it leaves room for error when finding proteins. The metrics of the fitted model is provided below:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+  .metric     .estimator .estimate
+  &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;
+1 sensitivity binary         0.769
+2 specificity binary         0.611
+3 accuracy    binary         0.677
+4 roc_auc     binary         0.778</code></pre>
+</div>
+</div>
+<p>The next step is to attempt a panel with more proteins. For both the t-test and logistical regression, we selected 25 potentially significant proteins from both to then intersect and find our panel. This method produced us a panel of 13 proteins, with a resulting sensitivity of 0.8125 and accuracy of 0.839, significantly better than our smaller panel of 4 proteins. Our results have improved significantly as we have included additional variables to estimate the result. The additional proteins we employed in testing may still have some significance towards our estimates, hence why it performed better, just because they weren’t significant enough they still have some correlation to the outcome.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+  .metric     .estimator .estimate
+  &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;
+1 sensitivity binary         0.812
+2 specificity binary         0.867
+3 accuracy    binary         0.839
+4 roc_auc     binary         0.946</code></pre>
+</div>
+</div>
+<p>Finally, we will make a panel using the original selection of 10 proteins using t-testing and random forests, but we will employ fuzzy intersection to determine the final panel. The result is a panel of 6 proteins that have a sensitivity of 0.75 and a accuracy of 0.774 after testing on the testing data. Using fuzzy intersection did not improve estimates to the same level of our benchmark, but it still produced pretty impressive accuracy results. Compared to our first panel of 4 proteins the fuzzy intersection had worse sensitivity, but had much more accuracy.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+  .metric     .estimator .estimate
+  &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;
+1 sensitivity binary         0.75 
+2 specificity binary         0.8  
+3 accuracy    binary         0.774
+4 roc_auc     binary         0.858</code></pre>
+</div>
+</div>
 </section>
 <section id="improved-classifier" class="level3">
 <h3 class="anchored" data-anchor-id="improved-classifier">Improved classifier</h3>
-<p>Task 4</p>
+<p>Now that we have looked at methodical variations with the way we select our protein panel, we will now attempt to find a panel that has better accuracy than the benchmark panel.</p>
+<p>Our first attempt was to use correlation to determine significant proteins. As in the previous section, we will partition the data first to create a training and testing set, and filter the data so we are just looking at participants who have ASD. We then determined the correlation of each variable, selecting the 2 proteins that had the highest absolute value of the correlation. Our resulting accuracy was 0.613 when testing on the testing data, so while this was a simpler panel, its estimates were far from comparable to our benchmark panel.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric  .estimator .estimate
+  &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;
+1 accuracy binary         0.613</code></pre>
+</div>
+</div>
+<p>Our second attempt was using LASSO regression to find our panel. First we tuned and fitted the Lasso model using deviance as our measure. The deviance graph with respect to the lamba value(the threshold) is shown below:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note that the suggested lambda range is between -2 and -3. However, since the purpose of this method is to create a “simpler” panel with less proteins, we then found a lambda, e^(-1.8), that have a low deviance and allowed for a small protein panel. The result of using this lambda was a panel of 3 proteins, which when tested on the testing set returned an accuracy of 0.871. This result improved upon our benchmark of 0.831 with a smaller panel, so we were successful in finding a simple panel with comparable results.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric  .estimator .estimate
+  &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;
+1 accuracy binary         0.871</code></pre>
+</div>
+</div>
 </section>
 </section>
 
@@ -186,10 +316,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -199,8 +346,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -212,7 +368,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -256,6 +535,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -281,6 +561,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -341,6 +647,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 

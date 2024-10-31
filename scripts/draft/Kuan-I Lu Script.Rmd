@@ -518,6 +518,9 @@ biomarker_LASSO = biomarker_clean %>%
   select(-ados) %>% 
   mutate(class = as.numeric(group == 'ASD'))
 
+write_csv(biomarker_LASSO, "biomarker_LASSO.csv")
+
+
 set.seed(101622)
 partitions <- biomarker_LASSO %>%
   initial_split(prop = 0.8)
@@ -589,6 +592,7 @@ read_csv("method_2_result.csv")
 ## Flowchart for writeups
 
 ```{r}
+library(DiagrammeR)
 mermaid("
   graph LR;
   

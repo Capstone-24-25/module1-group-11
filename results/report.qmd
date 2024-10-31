@@ -1,7 +1,7 @@
 ---
 title: "Biomarkers of ASD"
-subtitle: "If you want a subtitle put it here"
-author: "List names here"
+subtitle: "Group 11"
+author: "Kuan-I Lu, Caitlyn Vasquez, Henry Louie, Lucas Joseph"
 date: last-modified
 published-title: "Updated"
 editor: visual
@@ -50,6 +50,27 @@ Core Proteins: MAPK14, IgD, DERM, EPHB2, suPAR
 Additional 4 Proteins: ROR1, GI24, elF-4H, ARSB
 
 AUC = 0.860 ± 0.064
+
+Following is the graph of the workflow used in the paper:
+
+```{r}
+library(DiagrammeR)
+mermaid("
+  graph LR;
+  Z[Cleaned Data] --> A[Multiple t-test];
+  Z --> C[Correlation];
+  Z --> E[Random Forest];
+  A --> B[10 protein panel];
+  C --> D[10 protein panel];
+  E --> F[10 protein panel];
+  B --> G[Intersect of 5 panels];
+  D --> G;
+  F --> G;
+  G --> H[Add 4 Proteins, total of 9];
+  H --> I[Logistic Regression, AUC = 0.86];
+")
+```
+
 
 ## Findings
 
@@ -173,9 +194,7 @@ Our second attempt was using LASSO regression to find our panel. First we tuned 
 
 ```{r}
 # create class variable
-biomarker_LASSO = biomarker_clean %>% 
-  select(-ados) %>% 
-  mutate(class = as.numeric(group == 'ASD'))
+biomarker_LASSO = read_csv("../data/biomarker_LASSO.csv")
 
 set.seed(101622)
 partitions <- biomarker_LASSO %>%

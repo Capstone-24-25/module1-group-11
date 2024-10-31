@@ -57,6 +57,7 @@ td_profile <- biomarker_no_trim %>%
   filter(group == 'TD') %>% 
   pull(outlier_proteins)
 ```
+
 The group of subjects with ASD had a total of `r sum(asd_profile)` outlier proteins while the typically developing group had larger a total of `r sum(td_profile)`. The graph shows similar distributions with typically developing subjects having a mean total of **`r round(mean(td_profile), 2)`** outlier proteins, and subjects with ASD having a lower mean total of **`r round(mean(asd_profile), 2)`**. Both groups share a median total of proteins per subject of **`r median(asd_profile)`**.
 
 We also examined the proteins most prone to being outliers:
@@ -75,6 +76,7 @@ outlier_groups <- outlier_count %>%
   group_by(outliers) %>% 
   count()
 ```
+
 **A total of 722 of the proteins have 0 or 1 outliers across subjects.** The proteins with the highest count of outliers across subjects include **TLR2 with 7 outlier values**, and **IL-13, TGM3, GM-CSF, and hnRNP K, and SOD3 each with 6 outlier values.**
 
 ### Methodological variations

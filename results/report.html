@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="List names here">
-<meta name="dcterms.date" content="2023-10-27">
+<meta name="dcterms.date" content="2024-10-30">
 
 <title>Biomarkers of ASD</title>
 <style>
@@ -65,7 +65,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 27, 2023</p>
+      <p class="date">October 30, 2024</p>
     </div>
   </div>
   
@@ -73,7 +73,9 @@ ul.task-list li input[type="checkbox"] {
   </div>
   
 
+
 </header>
+
 
 <p>Use this as a template. Keep the headers and remove all other text. In all, your report can be quite short. When it is complete, render and then push changes to your team repository.</p>
 <section id="abstract" class="level2">
@@ -94,14 +96,40 @@ ul.task-list li input[type="checkbox"] {
 <section id="impact-of-preprocessing-and-outliers" class="level3">
 <h3 class="anchored" data-anchor-id="impact-of-preprocessing-and-outliers">Impact of preprocessing and outliers</h3>
 <p>Tasks 1-2</p>
+<p>After taking the log-transformed data, we counted the number of proteins that exceeded a transformed level of 3, which we would consider an outlier, for each subject in order identify subjects with outlier protein profiles. Below is a boxplot describing the distribution of the number of outlier proteins for each subjects divided between subjects with ASD and subjects considered typically developing(TD).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/Outlier-Graph-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The graph shows similar distributions with typically developing subjects having a mean total of <strong>14.88</strong> outlier proteins, and subjects with ASD having a lower mean total of <strong>10.7</strong>. Both groups share a median total of proteins per subject of <strong>7</strong>.</p>
+<p>We also examined the proteins most prone to being outliers:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/Outlier-Proteins-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A total of 722 of the proteins have 0 or 1 outliers across subjects. The proteins with the highest count of outliers across subjects include TLR2 with 7 outlier values, and IL-13, TGM3, GM-CSF, and hnRNP K, and SOD3 each with 6 outlier values.</p>
 </section>
-<section id="methodlogical-variations" class="level3">
-<h3 class="anchored" data-anchor-id="methodlogical-variations">Methodlogical variations</h3>
-<p>Task 3</p>
+<section id="methodological-variations" class="level3">
+<h3 class="anchored" data-anchor-id="methodological-variations">Methodological variations</h3>
+<p>The benchmark protein panel was using 4 proteins which resulted in a sensitivity of 0.875 and accuracy of 0.839. Our goal now is to determine alternate methods to extract a comparable panel that can reproduce similar resulting values. First we will partition the data into a training and testing set, using the training data to select the protein panel. Using a t-test and random forest variable importance we extract two different protein panels which we will then determine our final panel by selecting intersecting proteins from both tests. Our result is 4 selected proteins, which when fitted to the testing data returned a sensitivity of 0.769 and accuracy of 0.677. Despite using the same method to derive our protein panel, our panel provides a weaker accuracy of the data. This is most likely due to the variability of a training and testing set. Because we do not have the entire data to find significant proteins, it leaves room for error when finding proteins.</p>
+<p>The next step is to attempt a panel with more proteins. For both the t-test and logistical regression, we selected 25 potentially significant proteins from both to then intersect and find our panel. This method produced us a panel of 13 proteins, with a resulting sensitivity of 0.8125 and accuracy of 0.839, significantly better than our smaller panel of 4 proteins. Our results have improved significantly as we have included additional variables to estimate the result. The additional proteins we employed in testing may still have some significance towards our estimates, hence why it performed better, just because they weren’t significant enough they still have some correlation to the outcome.</p>
+<p>Finally, we will make a panel using the original selection of 10 proteins using t-testing and random forests, but we will employ fuzzy intersection to determine the final panel. The result is a panel of 6 proteins that have a sensitivity of 0.75 and a accuracy of 0.774 after testing on the testing data. Using fuzzy intersection did not improve estimates to the same level of our benchmark, but it still produced pretty impressive accuracy results. Compared to our first panel of 4 proteins the fuzzy intersection had worse sensitivity, but had much more accuracy.</p>
 </section>
 <section id="improved-classifier" class="level3">
 <h3 class="anchored" data-anchor-id="improved-classifier">Improved classifier</h3>
-<p>Task 4</p>
+<p>Now that we have looked at methodical variations with the way we select our protein panel, we will now attempt to find a panel that has better accuracy than the benchmark panel.</p>
+<p>Our first attempt was to use correlation to determine significant proteins. As in the before section, we will partition the data first to create a training and testing set, and filter the data so we are just looking at participants who have ASD. We then determined the correlation of each variable, selecting the 2 proteins that had the highest absolute value of the correlation. Our resulting accuracy was 0.613 when testing on the testing data, so while this was a simpler panel, its estimates were far from comparable to our benchmark panel.</p>
+<p>Our second attempt was using LASSO regression to find our panel. First we tuned and fitted the Lasso model using deviance as our measure. We then found a lambda, e^(-1.8), that how a low deviance and allowed for a small protein panel. The result of using this lambda was a panel of 3 proteins, which when tested on the testing set returned an accuracy of 0.871. This result improved upon our benchmark of 0.831 with a smaller panel, so we were successful in finding a simple panel with comparable results.</p>
 </section>
 </section>
 
@@ -186,10 +214,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -199,8 +244,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -212,7 +266,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -256,6 +433,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -281,6 +459,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -341,6 +545,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 

@@ -19,8 +19,6 @@ Use this as a template. Keep the headers and remove all other text. In all, your
 ```{r}
 # load any other packages and read data here
 library(tidyverse)
-<<<<<<< HEAD
-=======
 library(infer)
 library(randomForest)
 library(tidymodels)
@@ -28,7 +26,6 @@ library(modelr)
 library(yardstick)
 library(ggplot2)
 library(glmnet)
->>>>>>> fe01b917f1296463e94eb400ffe6833989f99c1e
 ```
 
 ## Abstract
@@ -45,21 +42,6 @@ Summarize the methodology of the paper in 1-3 paragraphs. You need not explain t
 
 ## Findings
 
-<<<<<<< HEAD
-Summarize your findings here. I've included some subheaders in a way that seems natural to me; you can structure this section however you like.
-
-### Impact of preprocessing and outliers
-
-Tasks 1-2
-
-### Methodlogical variations
-
-Task 3
-
-### Improved classifier
-
-Task 4
-=======
 ### Impact of Preprocessing
 
 
@@ -165,4 +147,3 @@ Note that the suggested lambda range is between -2 and -3. However, since the pu
 read_csv("../data/method_2_result.csv")
 
 ```
->>>>>>> fe01b917f1296463e94eb400ffe6833989f99c1e

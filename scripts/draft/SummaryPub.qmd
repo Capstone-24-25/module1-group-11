@@ -1,0 +1,23 @@
+---
+title: "Summary of Published Analysis"
+format: html
+editor: visual
+---
+
+## Abstract
+
+Autism spectrum disorder (ASD) is a neurodevelopmental disorder characterized by deficits in social communication and social interaction and restricted, repetitive patterns of behavior, interests, or activities. Our teams goal is to determine a protein panel that will help predict whether a child has ASD, to support diagnosis of the disorder. Our data findings are supported by the research article, "Blood Biomarker Discovery for Autism Spectrum Disorder: A Proteomic Analysis.” We will perform EDA on the data, looking at any outliers and what makes them stand apart. Additionally, we will attempt to modify our methods to find a simplier and more accurate protein panel to predict ASD in patients.
+
+## Summary
+
+The research goal was to employ proteomic analysis and machine learning to identify a panel of proteins as potential biomarkers for autism spectrum disorder (ASD). The researchers began by measuring protein levels in serum samples from boys with ASD and typically developing (TD) boys, using SomaLogic’s SOMAScan platform to analyze 1,125 proteins in total. To pinpoint proteins that significantly differed between ASD and TD groups and were correlated with ASD severity, they applied three distinct computational methods.
+
+First, they used Random Forest (RF) analysis, an ensemble decision-tree method, which evaluates each protein’s importance by shuffling its values and measuring the effect on model accuracy. They performed 1,000 iterations, averaging the importance values for each protein, and selected the top ten based on these scores. Second, they conducted a t-test analysis, a statistical test to identify proteins with significant level differences between the ASD and TD groups, choosing another ten proteins with the biggest significant differences. Third, they calculated the correlation between each protein’s levels and ASD severity, selecting ten proteins with the highest absolute correlation coefficients.
+
+Across all three methods, five proteins that consistently emerged as significant in each of the 3 methods were identified as core proteins. The researchers further enhanced the predictive accuracy of their model by combining these core proteins with four additional ones selected from the broader set of significant proteins. This final panel of nine proteins achieved a high accuracy, with AUC = 0.86 in classifying ASD, with sensitivity and specificity around 83%.
+
+Core Proteins: MAPK14, IgD, DERM, EPHB2, suPAR
+
+Additional 4 Proteins: ROR1, GI24, elF-4H, ARSB
+
+AUC = 0.860 ± 0.064

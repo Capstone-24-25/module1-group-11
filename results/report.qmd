@@ -42,11 +42,11 @@ Summarize the methodology of the paper in 1-3 paragraphs. You need not explain t
 
 ## Findings
 
-Summarize your findings here. I've included some subheaders in a way that seems natural to me; you can structure this section however you like.
+### Impact of Preprocessing
 
-### Impact of preprocessing and outliers
 
-Tasks 1-2
+
+### Impact of Outliers
 
 After taking the log-transformed data, we counted the number of proteins that exceeded a transformed level of 3, which we would consider an outlier, for each subject in order identify subjects with outlier protein profiles. Below is a boxplot describing the distribution of the number of outlier proteins for each subjects divided between subjects with ASD and subjects considered typically developing(TD).
 
@@ -94,7 +94,6 @@ The benchmark protein panel was using 4 proteins which resulted in a sensitivity
 read_csv("../data/part_1_result.csv")
 ```
 
-
 The next step is to attempt a panel with more proteins. For both the t-test and logistical regression, we selected 25 potentially significant proteins from both to then intersect and find our panel. This method produced us a panel of 13 proteins, with a resulting sensitivity of 0.8125 and accuracy of 0.839, significantly better than our smaller panel of 4 proteins. Our results have improved significantly as we have included additional variables to estimate the result. The additional proteins we employed in testing may still have some significance towards our estimates, hence why it performed better, just because they weren't significant enough they still have some correlation to the outcome.
 
 ```{r}
@@ -102,14 +101,12 @@ read_csv("../data/part_2_result.csv")
 
 ```
 
-
 Finally, we will make a panel using the original selection of 10 proteins using t-testing and random forests, but we will employ fuzzy intersection to determine the final panel. The result is a panel of 6 proteins that have a sensitivity of 0.75 and a accuracy of 0.774 after testing on the testing data. Using fuzzy intersection did not improve estimates to the same level of our benchmark, but it still produced pretty impressive accuracy results. Compared to our first panel of 4 proteins the fuzzy intersection had worse sensitivity, but had much more accuracy.
 
 ```{r}
 read_csv("../data/part_3_result.csv")
 
 ```
-
 
 ### Improved classifier
 
@@ -144,20 +141,9 @@ y_train <- training(partitions) %>%
 plot(cv.glmnet(x_train, y_train, family = 'binomial', type.measure = 'deviance'))
 ```
 
- Note that the suggested lambda range is between -2 and -3. However, since the purpose of this method is to create a "simpler" panel with less proteins, we then found a lambda, e\^(-1.8), that have a low deviance and allowed for a small protein panel. The result of using this lambda was a panel of 3 proteins, which when tested on the testing set returned an accuracy of 0.871. This result improved upon our benchmark of 0.831 with a smaller panel, so we were successful in finding a simple panel with comparable results.
- 
+Note that the suggested lambda range is between -2 and -3. However, since the purpose of this method is to create a "simpler" panel with less proteins, we then found a lambda, e\^(-1.8), that have a low deviance and allowed for a small protein panel. The result of using this lambda was a panel of 3 proteins, which when tested on the testing set returned an accuracy of 0.871. This result improved upon our benchmark of 0.831 with a smaller panel, so we were successful in finding a simple panel with comparable results.
+
 ```{r}
 read_csv("../data/method_2_result.csv")
 
 ```
- 
-
-
-
-
-
-
-
-
-
-

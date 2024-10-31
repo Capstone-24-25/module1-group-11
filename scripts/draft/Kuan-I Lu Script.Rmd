@@ -589,12 +589,13 @@ read_csv("method_2_result.csv")
 ## Flowchart for writeups
 
 ```{r}
-library(DiagrammeR)
-
-
 mermaid("
-  graph LR
-  A -> B
+  graph LR;
+  A[Start] --> B{Is it raining?};
+  B -- Yes --> C[Take an umbrella];
+  B -- No --> D[Enjoy your day];
+  C --> E[Go to your destination];
+  D --> E;
 ")
 ```
 
